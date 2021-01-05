@@ -32,7 +32,7 @@ class Request {
         $this->id = uniqid();
         $this->metadata = (object) $metadata;
         
-        $this->ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $this->ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
         $this->userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $this->sessionId = session_id();
         $this->userId = $app->user->id;
