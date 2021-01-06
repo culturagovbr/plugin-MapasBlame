@@ -50,7 +50,8 @@ class Plugin extends \MapasCulturais\Plugin
                 $request_types = implode('|', $plugin->config['request.types']);
                 $routes = $plugin->config['request.routes'];
                 $app->hook("<<$request_types>>(<<$routes>>):before", function () use($plugin, $request) {
-                    $action = "{$this->method} {$this->id}.{$this->action}";
+                    $request_uri = $_SERVER['REQUEST_URI'];
+                    $action = "{$this->method} {$request_uri} ({$this->id}.{$this->action})";
     
                     $metadata = [
                         'URL' => $plugin->getRequestData($this, 'URL'),
