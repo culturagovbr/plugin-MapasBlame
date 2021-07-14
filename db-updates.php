@@ -76,5 +76,8 @@ return [
                 blame_request br
                 LEFT JOIN blame_log bl ON bl.request_id = br.id 
             )");
+    },
+    'alter table blame_log action size' => function(){
+        __exec("ALTER TABLE blame_log ALTER COLUMN action TYPE varchar(2048)");
     }
 ];
