@@ -2,6 +2,7 @@
 
 use function MapasCulturais\__exec;
 use function MapasCulturais\__table_exists;
+use function MapasCulturais\__try;
 
 return [
     'create table blame tables' => function () {
@@ -53,7 +54,11 @@ return [
                 REFERENCES blame_request (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE;");
         }
     },
-
+    'alter table blame_log action size' => function(){
+        __try("DROP VIEW blame");
+        __exec("ALTER TABLE blame_log ALTER COLUMN action TYPE varchar(2048)");
+        __exec("DELETE FROM db_update WHERE name = 'create view blame'");
+    },
     'create view blame' => function () {
         __exec("CREATE VIEW blame AS (
             SELECT 
@@ -77,7 +82,4 @@ return [
                 LEFT JOIN blame_log bl ON bl.request_id = br.id 
             )");
     },
-    'alter table blame_log action size' => function(){
-        __exec("ALTER TABLE blame_log ALTER COLUMN action TYPE varchar(2048)");
-    }
 ];
