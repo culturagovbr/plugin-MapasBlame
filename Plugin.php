@@ -52,17 +52,19 @@ class Plugin extends \MapasCulturais\Plugin
             if ($plugin->config['request.enable']) {
                 $request_types = implode('|', $plugin->config['request.types']);
                 $routes = $plugin->config['request.routes'];
+                // 
                 $app->hook("<<$request_types>>(<<$routes>>):before", function () use($plugin, $request) {
                     $request_uri = $_SERVER['REQUEST_URI'];
                     $action = "{$this->method} {$request_uri} ({$this->id}.{$this->action})";
-    
+                    
                     $metadata = [
                         'URL' => $plugin->getRequestData($this, 'URL'),
                         'GET' => $plugin->getRequestData($this, 'GET'),
-                        'POST' => $plugin->getRequestData($this, 'POST'),
-                        'PUT' => $plugin->getRequestData($this, 'PUT'),
-                        'DELETE' => $plugin->getRequestData($this, 'DELETE'),
                     ];
+
+                    if(in_array($this->method, ['POST', 'PUT', 'DELETE', 'PATCH'])){
+                        $metadata[$this->method] = $plugin->getRequestData($this, 'POST');
+                    }
     
                     $request->log($action, $metadata);
                 });
