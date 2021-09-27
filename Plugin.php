@@ -25,6 +25,9 @@ class Plugin extends \MapasCulturais\Plugin
             'request.logData.PUT' => function ($data) {
                 return [];
             },
+            'request.logData.PATCH' => function ($data) {
+                return [];
+            },
             'request.logData.DELETE' => function ($data) {
                 return [];
             }
