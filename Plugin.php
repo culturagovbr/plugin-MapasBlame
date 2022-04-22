@@ -3,6 +3,7 @@
 namespace MapasBlame;
 
 use MapasCulturais\App;
+use MapasCulturais\i;
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -34,6 +35,14 @@ class Plugin extends \MapasCulturais\Plugin
         ];
 
         parent::__construct($config);
+    }
+
+    /**
+     * @return void
+     */
+    function register() {
+        $app = App::i();  
+        $app->registerController('blame', Controller::class);
     }
 
     function getRequestData($controller, $method) {
@@ -70,10 +79,30 @@ class Plugin extends \MapasCulturais\Plugin
                 });
             }
         });
-    }
 
-    function register()
-    {
+        $app->hook('API(blame.<<*>>):before', function() use($app) {
+            if (!$app->user->is('admin')) {
+                $app->halt(403,  i::__('Permissao negada'));
+            }
+        });
+
+        $app->hook('template(panel.userManagement.tabs):end', function() {
+            $this->part( 'tab', ['id' => 'user-log', 'label' => i::__('Log de acesso')] );
+        });
+
+        $app->hook('template(panel.userManagement.tabs-content):end', function() use ($app) {
+
+            $controller = $app->controller('blame');
+            $blame = $controller->apiQuery([
+                '@select' => '*', 
+                'action' => "like(*panel.index*)",
+                'userId' => "EQ({$this->controller->data['userId']})"
+            ]);
+
+            $app->view->jsObject['accessLog'] = $blame;
+
+            $this->part( 'blame/user-log', ['blame' => $blame] );
+        });
     }
 
 }
