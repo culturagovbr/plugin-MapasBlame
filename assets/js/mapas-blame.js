@@ -28,7 +28,6 @@ $(function() {
                     </tr>`;
             });
 
-            $('#user-log > table > tbody').html( html );
             if(firstPage)
                 $('#user-log > table > tbody').html( html );        
             else
