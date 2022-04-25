@@ -91,18 +91,11 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         $app->hook('template(panel.userManagement.tabs-content):end', function() use ($app) {
-
-            $controller = $app->controller('blame');
-            $blame = $controller->apiQuery([
-                '@select' => '*', 
-                'action' => "like(*panel.index*)",
-                'userId' => "EQ({$this->controller->data['userId']})"
-            ]);
-
-            $app->view->jsObject['accessLog'] = $blame;
-
-            $this->part( 'blame/user-log', ['blame' => $blame] );
+            $this->jsObject['MapasBlame'] = [];
+            $this->part( 'blame/user-log' );
         });
+
+        $app->view->enqueueStyle('app','blame-filter','css/blame.css');
     }
 
 }

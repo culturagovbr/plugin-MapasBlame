@@ -1,0 +1,23 @@
+#user-log .filter-title {
+    line-height: 32px;
+    margin: 0 15px 0 5px;
+    float: left;
+}
+#user-log .filter.filter-action {
+    width: unset;
+}
+#user-log .filter.filter-datetime {
+    width: unset;
+}
+#user-log .filter-submit {
+    float: right;
+}
+
+#user-log .load-more {
+    display: flex;
+    justify-content: center;
+}
+#user-log .load-more a {
+    padding: 10px 25px;
+    text-decoration: none !important;
+}

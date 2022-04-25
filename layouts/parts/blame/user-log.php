@@ -1,22 +1,42 @@
-<?php
-$logs = '';
-foreach ($blame as $log):
-    $date = $log['logTimestamp'];
-    $logs .= 
-    "<tr>
-        <td> $log[id] </td>
-        <td> $log[action] </td>
-        <td> $log[userBrowserName] </td>
-        <td> $log[userBrowserVersion] </td>
-        <td>".$date->format('d-m-Y H:i:s')." </td>
-    </tr>";
-endforeach;
+<?php 
+$this->jsObject['MapasBlame']['logUserId'] = $this->controller->data['userId'];
+$this->enqueueScript(
+    'app', // grupo de scripts
+    'mapas-blame',  // nome do script
+    'js/mapas-blame.js', // arquivo do script
+    [] // dependências do script
+);
 ?>
 
 <div id="user-log" class="aba-content">
 
+    <form id="logFilter">
+        <div class="row">
+            <div class="filter-title">
+                <?php \MapasCulturais\i::_e("Filtros:"); ?> 
+            </div>
+
+            <div class="filter filter-action">
+                <input type="text" placeholder="<?php \MapasCulturais\i::_e("Action"); ?>" id="action"> 
+            </div>
+
+            <div class="filter filter-datetime">
+                <label class="show-label" for="initDate">De</label>
+                <input type="text" placeholder="00/00/0000 00:00:00" id="initDate"> 
+
+                <label class="show-label" for="lastDate">a</label>
+                <input type="text" placeholder="00/00/0000 00:00:00" id="lastDate">
+            </div>
+
+            <div class="filter-submit">
+                <button type="button" class="btn btn-success">
+                    <?php \MapasCulturais\i::_e("Filtar logs");?>
+                </button>
+            </div>
+        </div>
+    </form>
+
     <table class="history-table entity-table">
-        <caption> Logs de acesso do usuário </caption>
         <thead>
             <tr>
                 <th>log ID</th>
@@ -27,9 +47,12 @@ endforeach;
             </tr>
         </thead>
         <tbody>
-            <?= $logs ?>
         </tbody>
     </table>
+
+    <div class="load-more">
+        <a class="prev"> <?php \MapasCulturais\i::_e("Carregar mais"); ?> </a>
+    </div>
 
 </div>
 
