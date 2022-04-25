@@ -65,9 +65,6 @@ $(function() {
     find(true);
 
     $('button', '#logFilter').click(filterLogs);
-
-    $('a', '#user-log .load-more').click( function() {
-       findMore();
-    });
+    $('a', '#user-log .load-more').click(findMore);
     
 });
