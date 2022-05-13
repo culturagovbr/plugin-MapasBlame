@@ -15,9 +15,16 @@ $this->enqueueScript(
             <div class="filter-title">
                 <?php \MapasCulturais\i::_e("Filtros:"); ?> 
             </div>
+        </div>
 
+        <div class="row">
             <div class="filter filter-action">
                 <input type="text" placeholder="<?php \MapasCulturais\i::_e("Action"); ?>" id="action"> 
+            </div>
+
+            <div class="filter filter-datetime">
+                <input type="checkbox" id="Diff"> 
+                <label class="show-label" for="Diff">Não diferenciar maiúsculas de minúsculas</label>
             </div>
 
             <div class="filter filter-datetime">
@@ -36,19 +43,8 @@ $this->enqueueScript(
         </div>
     </form>
 
-    <table class="history-table entity-table">
-        <thead>
-            <tr>
-                <th>log ID</th>
-                <th>Action</th>
-                <th>Browser</th>
-                <th>Browser Version</th>
-                <th>Data / Hora</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="history-table">
+    </div>
 
     <div class="load-more">
         <a class="prev"> <?php \MapasCulturais\i::_e("Carregar mais"); ?> </a>

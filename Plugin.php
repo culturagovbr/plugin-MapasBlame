@@ -52,7 +52,7 @@ class Plugin extends \MapasCulturais\Plugin
     }
 
     function _init()
-    {
+    {   
         $app = App::i();
         $plugin = $this;
 
