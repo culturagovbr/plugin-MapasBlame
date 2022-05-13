@@ -114,6 +114,7 @@
 #user-log .logUnit>* p {
     margin: 2px 0 2px 15px;
     font-size: 13px;
+    overflow-wrap: anywhere;
 }
 
 
