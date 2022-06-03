@@ -29,10 +29,10 @@ $this->enqueueScript(
 
             <div class="filter filter-datetime">
                 <label class="show-label" for="initDate">De</label>
-                <input type="text" placeholder="00/00/0000 00:00:00" id="initDate"> 
+                <input type="date" name="initDate" id="initDate"> 
 
-                <label class="show-label" for="lastDate">a</label>
-                <input type="text" placeholder="00/00/0000 00:00:00" id="lastDate">
+                <label class="show-label" for="lastDate">até</label>
+                <input type="date" name="lastDate" id="lastDate">
             </div>
 
             <div class="filter-submit">
