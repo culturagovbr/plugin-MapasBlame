@@ -59,6 +59,20 @@ return [
         __exec("ALTER TABLE blame_log ALTER COLUMN action TYPE varchar(2048)");
         __exec("DELETE FROM db_update WHERE name = 'create view blame'");
     },
+
+    'alter table blame_request columns length again' => function(){
+        __try("DROP VIEW blame");
+        
+        __exec("ALTER TABLE blame_request ALTER COLUMN user_os TYPE varchar(512)");
+        __exec("ALTER TABLE blame_request ALTER COLUMN user_device TYPE varchar(512)");
+        __exec("ALTER TABLE blame_request ALTER COLUMN user_browser_name TYPE varchar(512)");
+        __exec("ALTER TABLE blame_request ALTER COLUMN user_browser_version TYPE varchar(512)");
+        __exec("ALTER TABLE blame_request ALTER COLUMN user_agent TYPE varchar(1024)");
+        
+        __exec("DELETE FROM db_update WHERE name = 'create view blame'");
+    },
+    
+
     'create view blame' => function () {
         __exec("CREATE VIEW blame AS (
             SELECT 
