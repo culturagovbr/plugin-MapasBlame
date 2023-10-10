@@ -29,7 +29,7 @@ class Request {
         
         $this->conn = $app->em->getConnection();
         
-        $this->id = uniqid();
+        $this->id = $app->getToken(13);
         $this->metadata = (object) $metadata;
         
         $this->ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
