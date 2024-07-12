@@ -56,6 +56,10 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
         $plugin = $this;
 
+        $app->hook('template(panel.index.tabs):end', function() {
+            $this->part( 'blame/user-log' );
+        });
+
         $app->hook('mapasculturais.run:before', function() use($app, $plugin) {
             $request = new Request;
             if ($plugin->config['request.enable']) {
@@ -78,6 +82,11 @@ class Plugin extends \MapasCulturais\Plugin
                     $request->log($action, $metadata);
                 });
             }
+        });
+
+        $app->hook('GET(panel.blame)', function() use($app) {
+            $this->requireAuthentication();
+            $this->render('blame-system', []);
         });
 
         $app->hook('API(blame.<<*>>):before', function() use($app) {
