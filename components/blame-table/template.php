@@ -8,15 +8,16 @@ use MapasCulturais\i;
 
 $this->import('
     entity-table
+    mc-select
 ');
 ?>
 
 <!-- @clear-filters="clearFilters" @remove-filter="removeFilter($event)" -->
-<entity-table controller="blame" endpoint="find" type="blame" identifier="blameTable" :raw-processor="rawProcessor" :headers="headers" :visible="visible" :query="query" :limit="100" show-index hide-sort hide-actions> 
+<entity-table controller="blame" endpoint="find" type="blame" order="id DESC" identifier="blameTable" :raw-processor="rawProcessor" :headers="headers" :visible="visible" :query="query" :limit="100" show-index hide-sort hide-actions> 
     <template #filters>
         <div class="grid-12">
             <div class="field col-4 sm:col-6">
-                <label> <?php i::_e('Filtar por periodo') ?></label>
+                <label> <?= i::__('Filtar por periodo') ?></label>
                 <div class="datepicker">
                     <datepicker 
                         teleport
@@ -31,9 +32,15 @@ $this->import('
             </div>
     
             <div class="field col-4 sm:col-6">
-                <label> <?php i::_e('Filtar por id da seção') ?></label>
+                <label> <?= i::__('Filtar por id da seção') ?></label>
                 <input type="text" placeholder="ID da seção" v-model="sessionId" />
             </div>
+            
+            <div class="field col-4 sm:col-6">
+                <label> <?= i::__('Filtrar por ação') ?> </label>
+                <mc-select v-model:default-value="action" :options="actionOptions"></mc-select>
+            </div>
+
         </div>
     </template>    
 

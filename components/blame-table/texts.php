@@ -11,4 +11,12 @@ return [
     'ID Usuário' => i::__('ID Usuário'),
     'Sistema Operacional' => i::__('Sistema Operacional'),
     'Dispositivo' => i::__('Dispositivo'),
+
+    'Acessos' => i::__('Acessos'),
+    'Criações' => i::__('Criações'),
+    'Atualizações' => i::__('Atualizações'),
+    'Atualizações parciais' => i::__('Atualizações parciais'),
+    'Exclusões' => i::__('Exclusões'),
+    'Envios de inscrições' => i::__('Envios de inscrições'),
+    'Envios de avaliações' => i::__('Envios de avaliações'),
 ];

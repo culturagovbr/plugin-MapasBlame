@@ -40,8 +40,18 @@ app.component('blame-table', {
 
                 this.query['sessionId'] = `LIKE(*${id}*)`;
             }
-        }
+        },
 
+        action: {
+            handler(action) {
+                if (!action) {
+                    delete this.query['action'];
+                    return;
+                }
+
+                this.query['action'] = `LIKE(*${action}*)`
+            }
+        }
     },
 
     data() {
@@ -58,6 +68,16 @@ app.component('blame-table', {
             date: [new Date(), new Date()],
             locale: $MAPAS.config.locale,
             sessionId: '',
+            action: '',
+            actionOptions: [
+                { value: 'GET', label: __('Acessos', 'entity-table') },
+                { value: 'PUT',  label: __('Atualizações', 'entity-table') },
+                { value: 'PATCH',  label: __('Atualizações parciais', 'entity-table') },
+                { value: 'POST',  label: __('Criações', 'entity-table') },
+                { value: '/inscricoes/sendEvaluation/', label: __('Envio de avaliações', 'entity-table') },
+                { value: '/inscricoes/send/', label: __('Envio de inscrições', 'entity-table') },
+                { value: 'DELETE',  label: __('Exclusões', 'entity-table') },
+            ]
         }
     },
 
