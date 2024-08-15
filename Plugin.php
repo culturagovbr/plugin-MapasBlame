@@ -84,6 +84,10 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('template(panel.user-detail.management-properties):after', function() {
+            $this->part( 'blame/user-blame', []);
+        });
+
         $app->hook('GET(panel.blame)', function() use($app) {
             $this->requireAuthentication();
             $this->render('blame-system', []);
