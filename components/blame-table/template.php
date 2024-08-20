@@ -28,17 +28,27 @@ $this->import('
                         :dayNames="['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']"
                         range multiCalendars multiCalendarsSolo autoApply utc></datepicker>
                 </div>
-                <!-- :format="dateFormat" -->
             </div>
     
             <div class="field col-4 sm:col-6">
                 <label> <?= i::__('Filtar por id da seção') ?></label>
                 <input type="text" placeholder="ID da seção" v-model="sessionId" />
             </div>
-            
+
             <div class="field col-4 sm:col-6">
-                <label> <?= i::__('Filtrar por ação') ?> </label>
-                <mc-select v-model:default-value="action" :options="actionOptions"></mc-select>
+                <label> <?= i::__('Filtar por IP') ?></label>
+                <input type="text" maxlength="15" placeholder="endereço IP" v-model="IPAddress" />
+            </div>
+
+            <div class="field col-4 sm:col-6">
+                <label> <?= i::__('Filtrar por ações') ?> </label>
+                <mc-multiselect class="col-2" :model="selectedActions" :items="actionOptions" title="<?= i::esc_attr__('Filtrar por ações') ?>" @selected="filterActions()" @removed="filterActions()" hide-button>
+                    <template #default="{popover, setFilter, filter}">
+                        <div class="field">
+                            <input class="mc-multiselect--input" @keyup="setFilter($event.target.value)" @focus="popover.open()" placeholder="<?= i::esc_attr__('Selecione as ações: ') ?>">
+                        </div>
+                    </template>
+                </mc-multiselect>
             </div>
 
         </div>

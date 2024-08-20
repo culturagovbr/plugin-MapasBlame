@@ -42,16 +42,16 @@ app.component('blame-table', {
             }
         },
 
-        action: {
-            handler(action) {
-                if (!action) {
-                    delete this.query['action'];
+        IPAddress: {
+            handler(ip) {
+                if (!ip) {
+                    delete this.query['ip'];
                     return;
                 }
 
-                this.query['action'] = `LIKE(*${action}*)`
+                this.query['ip'] = `LIKE(*${ip}*)`
             }
-        }
+        },
     },
 
     data() {
@@ -68,16 +68,39 @@ app.component('blame-table', {
             date: [new Date(), new Date()],
             locale: $MAPAS.config.locale,
             sessionId: '',
+            IPAddress: '',
             action: '',
-            actionOptions: [
-                { value: 'GET', label: __('Acessos', 'entity-table') },
-                { value: 'PUT',  label: __('Atualizações', 'entity-table') },
-                { value: 'PATCH',  label: __('Atualizações parciais', 'entity-table') },
-                { value: 'POST',  label: __('Criações', 'entity-table') },
-                { value: '/inscricoes/sendEvaluation/', label: __('Envio de avaliações', 'entity-table') },
-                { value: '/inscricoes/send/', label: __('Envio de inscrições', 'entity-table') },
-                { value: 'DELETE',  label: __('Exclusões', 'entity-table') },
-            ]
+            selectedActions: [],
+
+            actionOptions: {
+                'GET': __('Acessos', 'blame-table'),
+                'PATCH': __('Atualizações parciais', 'blame-table'),
+
+                '%POST%registration.sendEvaluation%': __('Envio de Avaliações'),
+                '%POST%registration.send%': __('Envio de Inscrições'),
+
+                'POST': __('Criações', 'blame-table'),
+                '%POST%agent.index%': __('Criação de Agentes', 'blame-table'),
+                '%POST%opportunity.index%': __('Criação de Oportunidades', 'blame-table'),
+                '%POST%event.index%': __('Criação de Eventos', 'blame-table'),
+                '%POST%space.index%': __('Criação de Espaços', 'blame-table'),
+                '%POST%project.index%': __('Criação de Projetos', 'blame-table'),
+                
+                'PATCH': __('Atualizações', 'blame-table'),
+                '%PATCH%agent.edit%': __('Edição de Agentes', 'blame-table'),
+                '%PATCH%opportunity.edit%': __('Edição de Oportunidades', 'blame-table'),
+                '%PATCH%event.edit%': __('Edição de Eventos', 'blame-table'),
+                '%PATCH%space.edit%': __('Edição de Espaços', 'blame-table'),
+                '%PATCH%project.edit%': __('Edição de Projetos', 'blame-table'),
+                
+                'DELETE': __('Exclusões', 'blame-table'), 
+                '%DELETE%agent.single%': __('Exclusão de Agentes', 'blame-table'),
+                '%DELETE%opportunity.single%': __('Exclusão de Oportunidades', 'blame-table'),
+                '%DELETE%event.single%': __('Exclusão de Eventos', 'blame-table'),
+                '%DELETE%space.single%': __('Exclusão de Espaços', 'blame-table'),
+                '%DELETE%project.single%': __('Exclusão de Projetos', 'blame-table'),
+                
+            },
         }
     },
 
@@ -111,5 +134,19 @@ app.component('blame-table', {
             data.requestTimestamp = new McDate(data.requestTimestamp.date);
             return data;
         },
+        filterActions() {
+            let search = [];
+
+            for (const action of this.selectedActions) {
+                let clausure = `LIKE(*${action}*)`;
+                search.push(clausure);
+            }
+
+            if (search.length > 0) {
+                this.query['action'] = `OR(${search.join()})`;
+            } else {
+                delete this.query['action'];
+            }
+        }
     },
 });
