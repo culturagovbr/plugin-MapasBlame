@@ -85,7 +85,11 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         $app->hook('template(panel.user-detail.management-properties):after', function() {
-            $this->part( 'blame/user-blame', []);
+            $this->part('blame/user-blame');
+        });
+
+        $app->hook('component(panel--entity-tabs).trash:after', function() {
+            $this->part('blame/blame-tab');
         });
 
         $app->hook('GET(panel.blame)', function() use($app) {
