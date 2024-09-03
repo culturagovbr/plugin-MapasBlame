@@ -1,10 +1,12 @@
 <?php
 
 namespace MapasBlame;
+use MapasCulturais\Traits;
 
 class Controller extends \MapasCulturais\Controllers\EntityController
 {
-    use \MapasCulturais\Traits\ControllerAPI;
+    use Traits\ControllerAPI;
+
 
     protected $entityClassName = 'MapasBlame\Entities\Blame';
 

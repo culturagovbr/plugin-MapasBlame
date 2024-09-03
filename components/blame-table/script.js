@@ -73,32 +73,65 @@ app.component('blame-table', {
             selectedActions: [],
 
             actionOptions: {
-                'GET': __('Acessos', 'blame-table'),
-                'PATCH': __('Atualizações parciais', 'blame-table'),
+                'GET': __('REQUISIÇÕES - GET (acessos)', 'blame-table'),
+                'POST': __('REQUISIÇÕES - POST (Criações e outras ações)', 'blame-table'),
+                'PATCH': __('REQUISIÇÕES - PATCH (Atualizações parciais)', 'blame-table'),
+                'PUT': __('REQUISIÇÕES - PUT (Atualizações completas)', 'blame-table'),
+                'DELETE': __('REQUISIÇÕES - DELETE (Exclusões)', 'blame-table'),
 
-                '%POST%registration.sendEvaluation%': __('Envio de Avaliações'),
-                '%POST%registration.send%': __('Envio de Inscrições'),
+                'POST%registration.sendEvaluation%': __('Envio de Avaliações'),
 
-                'POST': __('Criações', 'blame-table'),
-                '%POST%agent.index%': __('Criação de Agentes', 'blame-table'),
-                '%POST%opportunity.index%': __('Criação de Oportunidades', 'blame-table'),
-                '%POST%event.index%': __('Criação de Eventos', 'blame-table'),
-                '%POST%space.index%': __('Criação de Espaços', 'blame-table'),
-                '%POST%project.index%': __('Criação de Projetos', 'blame-table'),
+                // INSCRIÇÕES
+                'POST%(registration.index)': __('INSCRIÇÕES - criação de inscrição'),
+                'PATCH%(registration.single)': __('INSCRIÇÕES - modificação de inscrição'),
+                'POST%(registration.send)': __('INSCRIÇÕES - envio de inscrição'),
+                'POST%(registration.validateEntity)': __('INSCRIÇÕES - validação de inscrição'),
+                'DELETE%(registration.single)': __('INSCRIÇÕES - exclusão de inscrição'),
+
+                // AGENTES
+                'GET%(agent.single)': __('AGENTES - acesso à página'),
+                'POST%(agent.index)': __('AGENTES - criação de agente'),
+                'PATCH%(agent.single)': __('AGENTES - modificação de agente'),
+                'DELETE%(agent.single)': __('AGENTES - exclusão de agente'),
+
+                // ESPAÇOS
+                'GET%(space.single)': __('ESPAÇOS - acesso à página'),
+                'POST%(space.index)': __('ESPAÇOS - criação de espaço'),
+                'PATCH%(space.single)': __('ESPAÇOS - modificação de espaço'),
+                'DELETE%(space.single)': __('ESPAÇOS - exclusão de espaço'),
+
+                // PROJETOS
+                'GET%(project.single)': __('PROJETOS - acesso à página'),
+                'POST%(project.index)': __('PROJETOS - criação de projeto'),
+                'PATCH%(project.single)': __('PROJETOS - modificação de projeto'),
+                'DELETE%(project.single)': __('PROJETOS - exclusão de projeto'),
                 
-                'PATCH': __('Atualizações', 'blame-table'),
-                '%PATCH%agent.edit%': __('Edição de Agentes', 'blame-table'),
-                '%PATCH%opportunity.edit%': __('Edição de Oportunidades', 'blame-table'),
-                '%PATCH%event.edit%': __('Edição de Eventos', 'blame-table'),
-                '%PATCH%space.edit%': __('Edição de Espaços', 'blame-table'),
-                '%PATCH%project.edit%': __('Edição de Projetos', 'blame-table'),
-                
-                'DELETE': __('Exclusões', 'blame-table'), 
-                '%DELETE%agent.single%': __('Exclusão de Agentes', 'blame-table'),
-                '%DELETE%opportunity.single%': __('Exclusão de Oportunidades', 'blame-table'),
-                '%DELETE%event.single%': __('Exclusão de Eventos', 'blame-table'),
-                '%DELETE%space.single%': __('Exclusão de Espaços', 'blame-table'),
-                '%DELETE%project.single%': __('Exclusão de Projetos', 'blame-table'),
+                // EVENTOS
+                'GET%(event.single)': __('EVENTOS - acesso à página'),
+                'POST%(event.index)': __('EVENTOS - criação de evento'),
+                'PATCH%(event.single)': __('EVENTOS - modificação de evento'),
+                'DELETE%(event.single)': __('EVENTOS - exclusão de evento'),
+                'POST%(eventoccurrence.index)': __('EVENTOS - criação de ocorrência'),
+                'DELETE%(eventoccurrence.single)': __('EVENTOS - exclusão de ocorrência'),
+
+                // OPORTUNIDADES
+                'GET%(opportunity.single)': __('OPORTUNIDADES - acesso à página'),
+                'GET%(opportunity.edit)': __('OPORTUNIDADES - acesso à página de gestão'),
+                'POST%(opportunity.index)': __('OPORTUNIDADES - criação de oportunidade'),
+                'PATCH%(opportunity.single)': __('OPORTUNIDADES - modificação de oportunidade'),
+                'DELETE%(opportunity.single)': __('OPORTUNIDADES - exclusão de oportunidade'),
+
+                // OPORTUNIDADES - fases
+                'POST%(evaluationmethodconfiguration.index)': __('OPORTUNIDADES - fase de avaliação - criação'),
+                'POST%(evaluationmethodconfiguration.index)': __('OPORTUNIDADES - fase de avaliação - exclusão'),
+
+                // OPORTUNIDADES - campos
+                'POST%(registrationfieldconfiguration.index)': __('OPORTUNIDADES - configuração do formulário - criação de campo'),
+                'POST%(registrationfieldconfiguration.single)': __('OPORTUNIDADES - configuração do formulário - modificação de campo'),
+                'GET%(registrationfieldconfiguration.delete)': __('OPORTUNIDADES - configuração do formulário - exclusão de campo'),
+                'POST%(registrationfileconfiguration.index)': __('OPORTUNIDADES - configuração do formulário - criação de anexo'),
+                'POST%(registrationfileconfiguration.single)': __('OPORTUNIDADES - configuração do formulário - modificação de anexo'),
+                'POST%(registrationfileconfiguration.delete)': __('OPORTUNIDADES - configuração do formulário - exclusão de anexo'),
                 
             },
         }
@@ -138,7 +171,7 @@ app.component('blame-table', {
             let search = [];
 
             for (const action of this.selectedActions) {
-                let clausure = `LIKE(*${action}*)`;
+                let clausure = `LIKE(${action}*)`;
                 search.push(clausure);
             }
 

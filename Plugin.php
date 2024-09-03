@@ -13,7 +13,8 @@ class Plugin extends \MapasCulturais\Plugin
         $config += [
             'request.enable' => true,
             'request.types' => ['GET', 'DELETE', 'PATCH', 'POST', 'PUT', /* 'API' */ ],
-            'request.routes' => '*',
+            'request.routes' => ['<<*>>'],
+            'request.excludeRoutes' => ['<<*>>.renewLock'],
             'request.logData.URL' => function ($data) {
                 return $data;
             },
@@ -64,9 +65,18 @@ class Plugin extends \MapasCulturais\Plugin
             $request = new Request;
             if ($plugin->config['request.enable']) {
                 $request_types = implode('|', $plugin->config['request.types']);
-                $routes = $plugin->config['request.routes'];
-                // 
-                $app->hook("<<$request_types>>(<<$routes>>):before", function () use($plugin, $request) {
+                $routes = [];
+                
+                foreach($plugin->config['request.routes'] as $route) {
+                    $routes[] = "<<$request_types>>($route):before";
+                }
+                foreach($plugin->config['request.excludeRoutes'] as $route) {
+                    $routes[] = "-<<*>>($route):before";
+                }
+
+                $routes = implode(',', $routes);
+
+                $app->hook($routes, function () use($plugin, $request) {
                     $request_uri = $_SERVER['REQUEST_URI'];
                     $action = "{$this->method} {$request_uri} ({$this->id}.{$this->action})";
                     

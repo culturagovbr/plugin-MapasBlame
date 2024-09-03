@@ -115,7 +115,6 @@ class Blame extends \MapasCulturais\Entity
      */
     protected $logMetadata;
 
-
     /**
      * @var \DateTime
      *

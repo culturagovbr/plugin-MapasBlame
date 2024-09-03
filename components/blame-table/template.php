@@ -55,10 +55,10 @@ $this->import('
     </template>    
 
     <template #logTimestamp="entity">
-        {{entity.entity.logTimestamp.date('2-digit year')}}
+        {{entity.entity.logTimestamp.date('2-digit year')}} {{entity.entity.logTimestamp.time()}} 
     </template>
 
     <template #requestTimestamp="entity">
-        {{entity.entity.requestTimestamp.date('2-digit year')}}
+        {{entity.entity.requestTimestamp.date('2-digit year')}} {{entity.entity.logTimestamp.time()}} 
     </template>
 </entity-table>
