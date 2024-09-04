@@ -17,16 +17,32 @@ $this->import('
     <template #filters>
         <div class="grid-12">
             <div class="field col-4 sm:col-6">
-                <label> <?= i::__('Filtar por periodo') ?></label>
+                <label> <?= i::__('Periodo inicial') ?></label>
                 <div class="datepicker">
                     <datepicker 
                         teleport
                         :locale="locale" 
                         :weekStart="0"
-                        v-model="date" 
+                        :format="dateFormat" 
+                        v-model="initialDate" 
                         :enableTimePicker='false' 
                         :dayNames="['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']"
-                        range multiCalendars multiCalendarsSolo autoApply utc></datepicker>
+                        autoApply utc></datepicker>
+                </div>
+            </div>
+
+            <div class="field col-4 sm:col-6">
+                <label> <?= i::__('Periodo final') ?></label>
+                <div class="datepicker">
+                    <datepicker 
+                        teleport
+                        :locale="locale" 
+                        :weekStart="0"
+                        :format="dateFormat" 
+                        v-model="finalDate" 
+                        :enableTimePicker='false' 
+                        :dayNames="['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']"
+                        autoApply utc></datepicker>
                 </div>
             </div>
     

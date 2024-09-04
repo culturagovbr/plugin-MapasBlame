@@ -16,19 +16,12 @@ app.component('blame-table', {
     },
     
     watch: {
-        date: {
-            handler(date){
-                if (!date) {
-                    this.date = [new Date(), new Date()];
-                    delete this.query['requestTimestamp'];
-                    return;
-                }
+        initialDate: {
+            handler() { this.filterByDate() }
+        },
 
-                const d0 = new McDate(new Date(date[0]));
-                const d1 = new McDate(new Date(date[1]));
-                this.query['requestTimestamp'] = `BET(${d0.date('sql')}, ${d1.date('sql')})`
-            },
-            deep: true,
+        finalDate: {
+            handler() { this.filterByDate() }
         },
 
         sessionId: {
@@ -65,6 +58,8 @@ app.component('blame-table', {
 
         return {
             query,
+            initialDate: '',
+            finalDate: '',
             date: [new Date(), new Date()],
             locale: $MAPAS.config.locale,
             sessionId: '',
@@ -180,6 +175,31 @@ app.component('blame-table', {
             } else {
                 delete this.query['action'];
             }
-        }
+        },
+        filterByDate() {            
+            if (this.initialDate && this.finalDate) {
+                let d0 = new McDate(new Date(this.initialDate));
+                let d1 = new McDate(new Date(this.finalDate));
+                this.query['requestTimestamp'] = `BET(${d0.date('sql')}, ${d1.date('sql')})`;
+            }
+
+            if (this.initialDate && !this.finalDate) {
+                let d0 = new McDate(new Date(this.initialDate));
+                this.query['requestTimestamp'] = `GTE(${d0.date('sql')})`;
+            }
+
+            if (!this.initialDate && this.finalDate) {
+                let d1 = new McDate(new Date(this.finalDate));
+                this.query['requestTimestamp'] = `LTE(${d1.date('sql')})`;
+            }
+
+            if (!this.initialDate && !this.finalDate) {
+                delete this.query['requestTimestamp'];
+            }
+        },
+        dateFormat(date) {
+            let mcdate = new McDate (date);
+            return mcdate.date('2-digit year');
+        },
     },
 });
