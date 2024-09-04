@@ -4,6 +4,8 @@ namespace MapasBlame\Entities;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @property User $user
+ * 
  * @ORM\Table(name="blame")
  * @ORM\Entity(readOnly=true)
  * @ORM\entity(repositoryClass="MapasCulturais\Repository")
@@ -36,6 +38,15 @@ class Blame extends \MapasCulturais\Entity
      */
     protected $sessionId;
 
+    /**
+     * @var \MapasCulturais\Entities\User
+     *
+     * @ORM\ManyToOne(targetEntity="MapasCulturais\Entities\User", fetch="LAZY")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     * })
+     */
+    protected $user;
 
     /**
      * @var int
