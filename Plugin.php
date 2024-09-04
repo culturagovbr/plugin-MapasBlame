@@ -57,9 +57,11 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
         $plugin = $this;
 
-        $app->hook('template(panel.index.tabs):end', function() {
-            $this->part( 'blame/user-log' );
-        });
+        if ($app->view->version < 2) {
+            $app->hook('template(panel.index.tabs):end', function() {
+                $this->part( 'blame/user-log' );
+            });
+        }
 
         $app->hook('mapasculturais.run:before', function() use($app, $plugin) {
             $request = new Request;
@@ -113,14 +115,18 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook('template(panel.userManagement.tabs):end', function() {
-            $this->part( 'tab', ['id' => 'user-log', 'label' => i::__('Log de acesso')] );
-        });
+        if ($app->view->version < 2) {
+            $app->hook('template(panel.userManagement.tabs):end', function() {
+                $this->part( 'tab', ['id' => 'user-log', 'label' => i::__('Log de acesso')] );
+            });
+        };
 
-        $app->hook('template(panel.userManagement.tabs-content):end', function() use ($app) {
-            $this->jsObject['MapasBlame'] = [];
-            $this->part( 'blame/user-log' );
-        });
+        if ($app->view->version < 2) {
+            $app->hook('template(panel.userManagement.tabs-content):end', function() use ($app) {
+                $this->jsObject['MapasBlame'] = [];
+                $this->part( 'blame/user-log' );
+            });
+        };
 
         $app->view->enqueueStyle('app','blame-filter','css/blame.css');
     }
