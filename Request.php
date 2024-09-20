@@ -54,6 +54,7 @@ class Request {
             'user_browser_version' => $this->browser->getVersion(),
             'user_os' => $this->os->getName(),
             'user_device' => $this->device->getName(),
+            'created_at' => (new DateTime())->format("Y-m-d H:i:s")
         ];
 
         $this->conn->insert('blame_request', $data);
@@ -70,7 +71,8 @@ class Request {
         $data = [
             'request_id' => $this->id,
             'action' => $action,
-            'metadata' => json_encode($metadata)
+            'metadata' => json_encode($metadata),
+            'created_at' => (new DateTime())->format("Y-m-d H:i:s")
         ];
 
         $this->conn->insert('blame_log', $data);
