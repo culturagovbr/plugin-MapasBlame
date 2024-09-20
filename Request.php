@@ -1,6 +1,7 @@
 <?php
 namespace MapasBlame;
 
+use DateTime;
 use MapasCulturais\App;
 use Sinergi\BrowserDetector\Browser;
 use Sinergi\BrowserDetector\Device;
