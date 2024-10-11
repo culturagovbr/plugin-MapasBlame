@@ -96,7 +96,7 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook('component(panel--entity-tabs).trash:after', function() {
+        $app->hook('template(panel.user-detail.user-detail--tabs):end', function() {
             $this->part('blame/blame-tab');
         });
 
