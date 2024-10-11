@@ -6,6 +6,6 @@ $this->import('
 ');
 ?>
 
-<mc-tab cache key="blame" label="Logs do sistema" slug="blame">
+<mc-tab cache key="blame" label="Logs do sistema" slug="blame" icon="log">
     <blame-table></blame-table>
 </mc-tab>
