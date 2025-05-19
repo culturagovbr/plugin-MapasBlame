@@ -96,4 +96,32 @@ return [
                 LEFT JOIN blame_log bl ON bl.request_id = br.id 
             )");
     },
+
+    'Aumenta tamanho da coluna IP na tabela blame_request' => function () {
+        __exec("DROP VIEW IF EXISTS blame;");
+
+        __exec("ALTER TABLE blame_request ALTER COLUMN ip TYPE VARCHAR(45);");
+
+        __exec("CREATE VIEW blame AS (
+            SELECT 
+                bl.id AS log_id,
+                br.id AS request_id,
+                br.ip,
+                br.session_id,
+                br.user_id,
+                bl.action,
+                br.user_agent,
+                br.user_browser_name,
+                br.user_browser_version,
+                br.user_os, 
+                br.user_device,
+                br.metadata AS request_metadata,
+                bl.metadata AS log_metadata,
+                br.created_at AS request_ts,
+                bl.created_at AS log_ts
+            FROM 
+                blame_request br
+                LEFT JOIN blame_log bl ON bl.request_id = br.id 
+            )");
+    }
 ];
