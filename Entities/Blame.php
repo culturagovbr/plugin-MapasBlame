@@ -114,7 +114,7 @@ class Blame extends \MapasCulturais\Entity
     /**
      * @var object
      *
-     * @ORM\Column(name="request_metadata", type="json_array")
+     * @ORM\Column(name="request_metadata", type="json")
      */
     protected $requestMetadata;
 
@@ -122,7 +122,7 @@ class Blame extends \MapasCulturais\Entity
     /**
      * @var object
      *
-     * @ORM\Column(name="log_metadata", type="json_array")
+     * @ORM\Column(name="log_metadata", type="json")
      */
     protected $logMetadata;
 
