@@ -4,6 +4,7 @@ namespace MapasBlame;
 
 use MapasCulturais\App;
 use MapasCulturais\i;
+use MapasCulturais\Themes\BaseV2\Theme as BaseV2Theme;
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -62,6 +63,13 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->part( 'blame/user-log' );
             });
         }
+
+        $app->hook('mapas.printJsObject:before', function() {
+            /** @var BaseV2Theme $this */
+
+            $this->jsObject['EntitiesDescription']['blame'] = Entities\Blame::getPropertiesMetadata();
+        });
+        
 
         $app->hook('mapasculturais.run:before', function() use($app, $plugin) {
             $request = new Request;
