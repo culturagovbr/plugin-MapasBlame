@@ -7,5 +7,5 @@ $this->import('
 ?>
 
 <mc-tab cache key="blame" label="Logs do sistema" slug="blame" icon="log">
-    <blame-table></blame-table>
+    <blame-table :user-id="entity.id"></blame-table>
 </mc-tab>

@@ -4,7 +4,7 @@ $this->import('
     blame-table
 ');
 ?>
-
+ESSE?
 <?php $this->applyTemplateHook('blame', 'before') ?>
 <div class="user-management__properties">
     <?php $this->applyTemplateHook('blame', 'begin') ?>

@@ -59,11 +59,6 @@ $this->import('
             <div class="field col-4 sm:col-6">
                 <label> <?= i::__('Filtrar por ações') ?> </label>
                 <mc-multiselect class="col-2" :model="selectedActions" :items="actionOptions" title="<?= i::esc_attr__('Filtrar por ações') ?>" @selected="filterActions()" @removed="filterActions()" hide-button>
-                    <template #default="{popover, setFilter, filter}">
-                        <div class="field">
-                            <input class="mc-multiselect--input" @keyup="setFilter($event.target.value)" @focus="popover.open()" placeholder="<?= i::esc_attr__('Selecione as ações: ') ?>">
-                        </div>
-                    </template>
                 </mc-multiselect>
             </div>
 
