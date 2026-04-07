@@ -71,8 +71,8 @@ class Plugin extends \MapasCulturais\Plugin
         });
         
 
-        $app->hook('mapasculturais.run:before', function() use($app, $plugin) {
-            $request = new Request;
+        $request = new Request;
+        $app->hook('mapasculturais.run:before', function() use($app, $plugin, $request) {
             if ($plugin->config['request.enable']) {
                 $request_types = implode('|', $plugin->config['request.types']);
                 $routes = [];
@@ -102,6 +102,14 @@ class Plugin extends \MapasCulturais\Plugin
                     $request->log($action, $metadata);
                 });
             }
+        });
+
+        $app->hook('entity(<<*>>).remove:after', function() use($app, $plugin, $request) {
+            if($this instanceof \MapasCulturais\EntityMetadata) {
+                return;
+            }
+            
+            $request->log("{$this} DELETE", []);
         });
 
         $app->hook('template(panel.user-detail.user-detail--tabs):end', function() {
