@@ -111,6 +111,15 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('entity(<<*>>).remove:after', function () {
+            if ($this instanceof \MapasCulturais\EntityMetadata) {
+                return;
+            }
+
+            $request = new Request();
+            $request->log("{$this} DELETE", []);
+        });
+
         $app->hook('template(panel.user-detail.user-detail--tabs):end', function() {
             $this->part('blame/blame-tab');
         });
