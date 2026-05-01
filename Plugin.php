@@ -71,8 +71,7 @@ class Plugin extends \MapasCulturais\Plugin
         });
         
 
-        $request = new Request;
-        $app->hook('mapasculturais.run:before', function() use($app, $plugin, $request) {
+        $app->hook('mapasculturais.run:before', function() use($app, $plugin) {
             if ($plugin->config['request.enable']) {
                 $request_types = implode('|', $plugin->config['request.types']);
                 $routes = [];
@@ -86,7 +85,15 @@ class Plugin extends \MapasCulturais\Plugin
 
                 $routes = implode(',', $routes);
 
-                $app->hook($routes, function () use($plugin, $request) {
+                $blameRequestHolder = new \stdClass();
+                $blameRequestHolder->request = null;
+
+                $app->hook($routes, function () use($plugin, $blameRequestHolder) {
+                    if ($blameRequestHolder->request === null) {
+                        $blameRequestHolder->request = new Request;
+                    }
+                    $request = $blameRequestHolder->request;
+
                     $request_uri = $_SERVER['REQUEST_URI'];
                     $action = "{$this->method} {$request_uri} ({$this->id}.{$this->action})";
                     
@@ -102,14 +109,6 @@ class Plugin extends \MapasCulturais\Plugin
                     $request->log($action, $metadata);
                 });
             }
-        });
-
-        $app->hook('entity(<<*>>).remove:after', function() use($app, $plugin, $request) {
-            if($this instanceof \MapasCulturais\EntityMetadata) {
-                return;
-            }
-            
-            $request->log("{$this} DELETE", []);
         });
 
         $app->hook('template(panel.user-detail.user-detail--tabs):end', function() {
