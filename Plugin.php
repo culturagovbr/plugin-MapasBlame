@@ -111,7 +111,7 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook('entity(<<*>>).remove:after', function () {
+        $app->hook('entity(<<*>>).remove:after', function() {
             if ($this instanceof \MapasCulturais\EntityMetadata) {
                 return;
             }
