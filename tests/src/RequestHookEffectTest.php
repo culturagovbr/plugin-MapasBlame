@@ -109,25 +109,33 @@ class RequestHookEffectTest extends TestCase
         $this->assertSame($afterFirstHit, $afterSecondFiring, 'Um segundo disparo na mesma request não deveria criar um novo blame_request');
         $this->assertCount(2, $this->fetchBlameLogs($idA), 'O segundo disparo deveria reusar o Request e adicionar um segundo blame_log');
 
-        // ===== metadata sempre inclui as chaves URL e GET =====
+        // ===== metadata sempre inclui as chaves URL e GET, com o valor capturado verbatim =====
         $requestB = $this->requestFactory->GET('site', 'index', [], ['foo' => 'bar']);
         $idB = $this->hitMatchedRouteAndGetNewRequestId($requestB, '/site/index');
         $logsB = $this->fetchBlameLogs($idB);
         $metadataB = json_decode($logsB[0]['metadata'], true);
         $this->assertArrayHasKey('URL', $metadataB);
         $this->assertArrayHasKey('GET', $metadataB);
+        // logData.URL/GET default são a closure identidade (Plugin.php:19-24) — os valores
+        // devem ser exatamente urlData/getData do controller, não só as chaves presentes.
+        // 'site.index' não tem parâmetros de URL, então urlData é vazio.
+        $this->assertSame([], $metadataB['URL']);
+        $this->assertSame(['foo' => 'bar'], $metadataB['GET']);
 
-        // ===== Verbo de escrita adiciona metadata[$method] =====
+        // ===== Verbo de escrita adiciona metadata[$method] — e o valor descarta o corpo =====
         // 'site.clearCache' é ALL_clearCache() — aceita qualquer verbo HTTP e não exige
         // entidade/permissão para disparar o hook :before (só age se o usuário for
         // superAdmin, o que não é necessário aqui). RequestFactory não constrói PUT, então
-        // cobrimos POST/PATCH/DELETE.
+        // cobrimos POST/PATCH/DELETE. O payload não-vazio abaixo existe para provar que o
+        // corpo É descartado (logData.POST default retorna [], Plugin.php:25-27) — a decisão
+        // de privacidade central do plugin (nunca persistir senha/dado sensível em blame_log).
         foreach (['POST', 'PATCH', 'DELETE'] as $method) {
-            $request = $this->requestFactory->{$method}('site', 'clearCache');
+            $request = $this->requestFactory->{$method}('site', 'clearCache', payload: ['password' => 'segredo']);
             $id = $this->hitMatchedRouteAndGetNewRequestId($request, '/site/clearCache');
             $logs = $this->fetchBlameLogs($id);
             $metadata = json_decode($logs[0]['metadata'], true);
             $this->assertArrayHasKey($method, $metadata, "metadata deveria ter a chave {$method}");
+            $this->assertSame([], $metadata[$method], "metadata[{$method}] deveria descartar o corpo da request (default de logData.{$method})");
         }
 
         // ===== Ação *.renewLock é excluída do log de request =====
