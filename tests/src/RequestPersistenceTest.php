@@ -231,6 +231,24 @@ class RequestPersistenceTest extends TestCase
         $this->assertSame(0, $this->countBlameLogs($request->id));
     }
 
+    /**
+     * `save()` (Request.php:47-63) não checa `$this->isNew` antes de inserir — sempre monta o
+     * `INSERT` e o dispara. Chamar `save()` duas vezes no mesmo objeto tenta inserir a mesma
+     * `id` (PK de `blame_request`) de novo, violando a constraint. Comportamento observado, não
+     * assumido: `Doctrine\DBAL\Exception\UniqueConstraintViolationException`, não capturada.
+     */
+    function testCallingSaveTwiceViolatesPrimaryKeyConstraint()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $request = new TestableRequest();
+        $request->save();
+
+        $this->expectException(\Doctrine\DBAL\Exception\UniqueConstraintViolationException::class);
+
+        $request->save();
+    }
+
     // ===== log() =====
 
     function testFirstLogOnNewRequestInsertsBlameRequestAndBlameLog()
