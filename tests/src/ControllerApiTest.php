@@ -159,4 +159,61 @@ class ControllerApiTest extends TestCase
         // user.{email,profile.{name,avatar}} não vêm — só id e @entityType da relação.
         $this->assertSame(['id' => $user->id, '@entityType' => 'user'], $row['user']);
     }
+
+    /**
+     * db-updates.php:76-97 monta a view com LEFT JOIN blame_request->blame_log — uma
+     * blame_request sem log correspondente (exatamente o que save() sem log() produz,
+     * RequestPersistenceTest::testSaveCalledDirectlyInsertsNothingIntoBlameLog) aparece na
+     * view com as colunas do lado blame_log NULL, incluindo log_id — que é o @ORM\Id da
+     * entidade Blame (Blame.php:20-23).
+     *
+     * Descoberta: a hidratação NÃO falha nem lança exceção com id=null — Doctrine devolve a
+     * linha normalmente (id/action null, o resto das colunas de blame_request presentes).
+     * Comportamento atual observado, não assumido.
+     */
+    function testApiFindHydratesBlameRequestWithoutLogAsNullIdAndAction()
+    {
+        $admin = $this->userDirector->createUser('admin');
+        $this->login($admin);
+
+        $user = $this->userDirector->createUser();
+
+        $requestId = substr(md5(uniqid('', true)), 0, 13);
+        $conn = $this->app->em->getConnection();
+        $conn->insert('blame_request', [
+            'id' => $requestId,
+            'ip' => '203.0.113.99',
+            'session_id' => str_repeat('c', 32),
+            'user_id' => $user->id,
+            'metadata' => json_encode([]),
+            'user_agent' => 'ControllerApiTest-Agent/1.0',
+            'user_browser_name' => 'ControllerApiTest Browser',
+            'user_browser_version' => '1.0',
+            'user_os' => 'ControllerApiTest OS',
+            'user_device' => 'ControllerApiTest Device',
+            'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
+        ]);
+        // Sem INSERT em blame_log de propósito — é o caso órfão do LEFT JOIN.
+
+        $request = new ServerRequest(method: 'GET', uri: '/api/blame/find', queryParams: [
+            '@select' => 'id,requestId,action,ip,userId',
+            'userId' => "EQ({$user->id})",
+        ]);
+
+        $this->app->reset();
+        $this->app->run($request, false);
+
+        $this->assertSame(200, $this->app->response->getStatusCode());
+
+        $body = json_decode((string) $this->app->response->getBody(), true);
+
+        $this->assertCount(1, $body);
+        $row = $body[0];
+
+        $this->assertNull($row['id']);
+        $this->assertNull($row['action']);
+        $this->assertSame($requestId, $row['requestId']);
+        $this->assertSame($user->id, $row['userId']);
+        $this->assertSame('203.0.113.99', $row['ip']);
+    }
 }
