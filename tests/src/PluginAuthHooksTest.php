@@ -128,6 +128,16 @@ class PluginAuthHooksTest extends TestCase
         });
     }
 
+    function testApiBlameAsGuestIsForbidden()
+    {
+        // setUp() já faz logout(); usuário atual é GuestUser.
+        $request = new ServerRequest(method: 'GET', uri: '/api/blame/find');
+
+        $this->withRequestUri('/api/blame/find', function () use ($request) {
+            $this->assertStatus403($request);
+        });
+    }
+
     // Nota: "API blame.<<*>> como admin → não é barrada pelo gate 403" já está coberto por
     // ControllerApiTest::testApiFindAsAdminRespondsWithArray — não duplicado aqui.
 }
