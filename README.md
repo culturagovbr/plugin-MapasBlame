@@ -33,4 +33,15 @@ Sem esse `-f`, a suíte roda normalmente sem o plugin — sem nenhum impacto nos
 | Arquivo | O que valida |
 |---|---|
 | `SmokeTest.php` | Add-on funcionando: plugin ativo, controller `blame` registrado, tabelas `blame_request`/`blame_log` existem e persistem |
-| `Traits/AssertsHooks.php` | Helper `assertHookFired()`/`assertHookNotFired()` — registra um listener temporário para confirmar que um hook foi (ou não foi) disparado, útil quando o efeito do hook não é observável diretamente |
+| `PluginConfigTest.php` | `Plugin::__construct` — defaults de config e o comportamento de union (`+=`) ao passar config customizada |
+| `PluginGetRequestDataTest.php` | `Plugin::getRequestData()` — despacho para `logData.{METHOD}` a partir das propriedades do controller |
+| `PluginRequestHookAssemblyTest.php` | Montagem da string de rotas do hook `mapasculturais.run:before` a partir de `request.types`/`request.routes`/`request.excludeRoutes` |
+| `PluginRemoveHookTest.php` | Hook `entity(<<*>>).remove:after` — dispara para entidades normais, ignora `EntityMetadata`, formato do `action`, sem reuso de holder |
+| `ControllerApiTest.php` | `register()`/`Controller.php` (construtor, `entityClassName`, `usesAPI()`), mapeamento da entidade `Blame` e `API_find` como admin |
+| `PluginAuthHooksTest.php` | Hook `mapas.printJsObject:before` e os gates de autorização de `panel/blame` e da API `blame.<<*>>` |
+| `RequestConstructTest.php` | `Request::__construct` — id, metadata, ip, userAgent, sessionId, userId (logado e guest), browser/os/device, `isNew`, conexão |
+| `RequestPersistenceTest.php` | `Request::save()`/`log()` — as colunas persistidas, o invariante "1ª log() = 2 INSERTs, N logs = 1 request + N logs", edge cases de metadata |
+| `RequestHookEffectTest.php` | Efeito de ponta a ponta do hook de request: gravação via request casada, reuso do holder, formato do `action`, exclusão de `renewLock` |
+| `Doubles/TestablePlugin.php` | Double do `Plugin` com `_init()` no-op (evita registrar hooks globais a cada instância de teste) |
+| `Doubles/TestableRequest.php` | Double do `Request` expondo getters para `isNew`/`conn` (props protegidas) |
+| `Traits/AssertsHooks.php` | Helper `assertHookFired()`/`assertHookNotFired()` — registra um listener para confirmar que um hook foi (ou não foi) disparado, útil quando o efeito do hook não é observável diretamente |
