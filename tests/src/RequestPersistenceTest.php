@@ -373,4 +373,31 @@ class RequestPersistenceTest extends TestCase
         $this->assertSame(['valor' => "antes\0depois"], json_decode($logs[0]['metadata'], true));
     }
 
+    /**
+     * `Request::log()` (Request.php:69-75) chama `json_encode($metadata)` sem
+     * `JSON_INVALID_UTF8_SUBSTITUTE`/`JSON_THROW_ON_ERROR` — bytes que não formam UTF-8 válido
+     * (ex.: `\xB1` solto) fazem `json_encode()` retornar `false` **silenciosamente** (sem lançar
+     * exceção em si). Mas a coluna `metadata` é `JSON NOT NULL` no Postgres (db-updates.php:20,
+     * 41), não `text` — `$conn->insert()` com o valor `false` (convertido para string vazia
+     * pelo driver PDO) falha no banco com `SQLSTATE[22P02]: invalid input syntax for type json`
+     * ("The input string ended unexpectedly"), propagada como
+     * `Doctrine\DBAL\Exception\DriverException` não capturada por `Request::log()`.
+     * Comportamento observado: bytes inválidos de UTF-8 em qualquer valor logado (ex.: um
+     * parâmetro de query GET malformado) fariam o próprio log de auditoria da requisição falhar
+     * com uma exceção não tratada — dentro do listener de `mapasculturais.run:before`
+     * (Plugin.php:88-110), que roda como parte do processamento normal de qualquer rota casada,
+     * não isolado do restante da resposta.
+     */
+    function testMetadataWithInvalidUtf8BytesThrowsDriverExceptionOnInsert()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $this->assertFalse(json_encode(['valor' => "\xB1\x31"]), 'Pré-condição: confirma que essa sequência de bytes não é UTF-8 válido');
+
+        $request = new TestableRequest();
+
+        $this->expectException(\Doctrine\DBAL\Exception\DriverException::class);
+
+        $request->log('ACTION', ['valor' => "\xB1\x31"]);
+    }
 }
