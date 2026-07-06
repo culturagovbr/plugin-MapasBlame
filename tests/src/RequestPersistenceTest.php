@@ -251,6 +251,28 @@ class RequestPersistenceTest extends TestCase
 
     // ===== log() =====
 
+    /**
+     * `log()` (Request.php:65-77) só chama `save()` se `$this->isNew` — um `save()` explícito
+     * antes já deixa `isNew` `false` (`testSaveFlipsIsNewToFalse`), então o `log()` seguinte não
+     * tenta inserir `blame_request` de novo (o que violaria a PK, como em
+     * `testCallingSaveTwiceViolatesPrimaryKeyConstraint`), só grava o `blame_log`.
+     */
+    function testExplicitSaveFollowedByLogDoesNotDuplicateBlameRequest()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $request = new TestableRequest();
+        $request->save();
+        $request->log('ACTION', []);
+
+        $count = $this->app->em->getConnection()->fetchScalar(
+            'SELECT count(*) FROM blame_request WHERE id = ?',
+            [$request->id]
+        );
+        $this->assertEquals(1, $count);
+        $this->assertSame(1, $this->countBlameLogs($request->id));
+    }
+
     function testFirstLogOnNewRequestInsertsBlameRequestAndBlameLog()
     {
         $this->setAppRequestIp('203.0.113.10');
