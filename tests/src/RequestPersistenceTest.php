@@ -6,10 +6,12 @@ use MapasCulturais\Request as CoreRequest;
 use Tests\Abstract\TestCase;
 use Tests\MapasBlame\Doubles\TestableRequest;
 use Tests\Traits\RequestFactory;
+use Tests\Traits\UserDirector;
 
 class RequestPersistenceTest extends TestCase
 {
     use RequestFactory;
+    use UserDirector;
 
     private function setAppRequestIp(string $ip): void
     {
@@ -91,6 +93,56 @@ class RequestPersistenceTest extends TestCase
                   'user_browser_name', 'user_browser_version', 'user_os', 'user_device', 'created_at'] as $column) {
             $this->assertArrayHasKey($column, $row, "Coluna {$column} deveria existir em blame_request");
         }
+
+        // A existência da chave (acima) só prova o schema da tabela — um SELECT * sempre
+        // retorna todas as colunas, preenchidas ou não. As asserções abaixo travam que save()
+        // de fato grava o valor certo em cada uma.
+        $this->assertSame('203.0.113.10', $row['ip']);
+        $this->assertSame('MapasBlameTest-Agent/1.0', $row['user_agent']);
+    }
+
+    function testSavePersistsUserIdForLoggedInUser()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $user = $this->userDirector->createUser();
+        $this->login($user);
+
+        $request = new TestableRequest();
+        $request->save();
+
+        $row = $this->fetchBlameRequest($request->id);
+
+        $this->assertEquals($user->id, $row['user_id']);
+    }
+
+    function testSavePersistsZeroUserIdForGuest()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        // setUp() já faz logout(); usuário atual é GuestUser (id === 0).
+        $request = new TestableRequest();
+        $request->save();
+
+        $row = $this->fetchBlameRequest($request->id);
+
+        $this->assertEquals(0, $row['user_id']);
+    }
+
+    function testSavePersistsSessionIdMatchingTheRequestProperty()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $request = new TestableRequest();
+        $request->save();
+
+        $row = $this->fetchBlameRequest($request->id);
+
+        // session_id é CHAR(32) no Postgres — valores mais curtos vêm de volta com padding
+        // de espaços à direita, daí o rtrim. Comparado contra a propriedade capturada na
+        // construção (não recomputado via session_id() aqui), mesmo padrão já usado para
+        // browser/os/device em testSavePersistsBrowserOsDeviceFromSinergiGetters.
+        $this->assertSame($request->sessionId, rtrim($row['session_id']));
     }
 
     function testSavePersistsMetadataAsJsonEncodedObject()
