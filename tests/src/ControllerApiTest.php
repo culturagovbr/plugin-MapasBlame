@@ -6,14 +6,28 @@ use Laminas\Diactoros\ServerRequest;
 use MapasBlame\Controller;
 use MapasBlame\Entities\Blame;
 use Tests\Abstract\TestCase;
+use Tests\MapasBlame\Traits\RestoresHookRegistry;
 use Tests\Traits\UserDirector;
 
 class ControllerApiTest extends TestCase
 {
+    use RestoresHookRegistry;
     use UserDirector;
 
     // Nota: "$app->controller('blame') resolve para MapasBlame\Controller" já está coberto
     // por SmokeTest::testBlameControllerIsRegistered — não duplicado aqui.
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->snapshotHookRegistry();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restoreHookRegistry();
+        parent::tearDown();
+    }
 
     function testConstructorDoesNotThrow()
     {
