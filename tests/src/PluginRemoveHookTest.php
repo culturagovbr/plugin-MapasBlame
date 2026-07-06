@@ -6,6 +6,7 @@ use MapasCulturais\Entities\Agent;
 use MapasCulturais\Request as CoreRequest;
 use Tests\Abstract\TestCase;
 use Tests\MapasBlame\Traits\AssertsHooks;
+use Tests\MapasBlame\Traits\RestoresAppRequest;
 use Tests\Traits\AgentDirector;
 use Tests\Traits\RequestFactory;
 use Tests\Traits\UserDirector;
@@ -15,17 +16,25 @@ class PluginRemoveHookTest extends TestCase
     use AssertsHooks;
     use AgentDirector;
     use RequestFactory;
+    use RestoresAppRequest;
     use UserDirector;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->snapshotAppRequest();
 
         // MapasBlame\Request::__construct lê $app->request->getIp(), e $app->request
         // é null por padrão em teste — Plugin.php:119 cria um `new Request()` a cada
         // remoção, então precisa estar montado antes de qualquer teste deste arquivo.
         $psr7 = $this->requestFactory->GET('site', 'index');
         $this->app->request = new CoreRequest($psr7, 'site', 'index', []);
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restoreAppRequest();
+        parent::tearDown();
     }
 
     private function snapshotBlameRequestIds(): array

@@ -5,13 +5,27 @@ namespace Tests\MapasBlame;
 use MapasCulturais\Request as CoreRequest;
 use Tests\Abstract\TestCase;
 use Tests\MapasBlame\Doubles\TestableRequest;
+use Tests\MapasBlame\Traits\RestoresAppRequest;
 use Tests\Traits\RequestFactory;
 use Tests\Traits\UserDirector;
 
 class RequestPersistenceTest extends TestCase
 {
     use RequestFactory;
+    use RestoresAppRequest;
     use UserDirector;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->snapshotAppRequest();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restoreAppRequest();
+        parent::tearDown();
+    }
 
     private function setAppRequestIp(string $ip): void
     {

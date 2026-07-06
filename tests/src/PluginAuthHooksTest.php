@@ -13,10 +13,13 @@ class PluginAuthHooksTest extends TestCase
     use RestoresHookRegistry;
     use UserDirector;
 
+    private $viewControllerSnapshot;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->snapshotHookRegistry();
+        $this->viewControllerSnapshot = $this->app->view->controller;
     }
 
     protected function tearDown(): void
@@ -32,6 +35,11 @@ class PluginAuthHooksTest extends TestCase
         // legítimos de outros módulos/plugins (LGPD, MultipleLocalAuth, ProfileCompletion)
         // que também casam o nome 'GET(panel.blame):before'.
         $this->restoreHookRegistry();
+
+        // testPrintJsObjectPopulatesEntitiesDescriptionForBlame atribui $app->view->controller
+        // diretamente (Theme.php:164-169 lê essa propriedade) — sem restaurar aqui, o valor
+        // vaza para outros arquivos que rodam depois no mesmo processo (sem isolamento).
+        $this->app->view->controller = $this->viewControllerSnapshot;
 
         parent::tearDown();
     }

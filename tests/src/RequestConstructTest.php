@@ -8,13 +8,27 @@ use Sinergi\BrowserDetector\Device;
 use Sinergi\BrowserDetector\Os;
 use Tests\Abstract\TestCase;
 use Tests\MapasBlame\Doubles\TestableRequest;
+use Tests\MapasBlame\Traits\RestoresAppRequest;
 use Tests\Traits\RequestFactory;
 use Tests\Traits\UserDirector;
 
 class RequestConstructTest extends TestCase
 {
     use RequestFactory;
+    use RestoresAppRequest;
     use UserDirector;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->snapshotAppRequest();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restoreAppRequest();
+        parent::tearDown();
+    }
 
     /**
      * MapasBlame\Request::__construct lê $app->request->getIp(), então $app->request
