@@ -5,22 +5,33 @@ namespace Tests\MapasBlame;
 use Laminas\Diactoros\ServerRequest;
 use MapasBlame\Entities\Blame;
 use Tests\Abstract\TestCase;
+use Tests\MapasBlame\Traits\RestoresHookRegistry;
 use Tests\Traits\UserDirector;
 
 class PluginAuthHooksTest extends TestCase
 {
+    use RestoresHookRegistry;
     use UserDirector;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->snapshotHookRegistry();
+    }
 
     protected function tearDown(): void
     {
         // Cada $app->run() contra uma rota casada (panel/blame) faz o listener de
         // mapasculturais.run:before de Plugin.php:74 registrar MAIS UM listener permanente
         // no padrão de rotas — o closure não é idempotente, os listeners antigos nunca são
-        // removidos. Sem limpar aqui, esses listeners sobrevivem além deste arquivo e, ao
+        // removidos. Sem restaurar aqui, esses listeners sobrevivem além deste arquivo e, ao
         // disparar de novo em outro arquivo, tentam reusar um Request cujo blame_request já
         // foi desfeito pelo rollback deste teste — violação de FK que aborta a transação do
-        // teste seguinte.
-        $this->app->clearHooks('GET(panel.blame):before');
+        // teste seguinte. restoreHookRegistry() (ao contrário de clearHooks(), usado aqui
+        // antes) remove só o que foi registrado durante este teste, sem atingir listeners
+        // legítimos de outros módulos/plugins (LGPD, MultipleLocalAuth, ProfileCompletion)
+        // que também casam o nome 'GET(panel.blame):before'.
+        $this->restoreHookRegistry();
 
         parent::tearDown();
     }
