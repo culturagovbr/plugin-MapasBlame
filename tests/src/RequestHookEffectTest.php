@@ -4,6 +4,7 @@ namespace Tests\MapasBlame;
 
 use Laminas\Diactoros\ServerRequest;
 use Tests\Abstract\TestCase;
+use Tests\MapasBlame\Traits\RestoresHookRegistry;
 use Tests\Traits\RequestFactory;
 use Tests\Traits\UserDirector;
 
@@ -20,12 +21,27 @@ use Tests\Traits\UserDirector;
  * blame_request que o rollback do primeiro método já desfez — violação de FK que aborta a
  * transação inteira. Por isso: um único método, uma única transação sem rollback no meio — os
  * holders acumulados ao longo do teste continuam válidos porque nada é desfeito entre os
- * passos.
+ * passos. O tearDown() restaura o registro de hooks ao estado anterior ao teste, para que os
+ * listeners registrados aqui não vazem para outros arquivos que rodam depois no mesmo
+ * processo.
  */
 class RequestHookEffectTest extends TestCase
 {
     use RequestFactory;
+    use RestoresHookRegistry;
     use UserDirector;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->snapshotHookRegistry();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restoreHookRegistry();
+        parent::tearDown();
+    }
 
     private function snapshotBlameRequestIds(): array
     {
