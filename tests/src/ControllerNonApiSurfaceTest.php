@@ -2,6 +2,8 @@
 
 namespace Tests\MapasBlame;
 
+use MapasBlame\Entities\Blame;
+use MapasCulturais\Exceptions\PermissionDenied;
 use Tests\Abstract\TestCase;
 use Tests\MapasBlame\Traits\RestoresHookRegistry;
 use Tests\Traits\RequestFactory;
@@ -137,5 +139,67 @@ class ControllerNonApiSurfaceTest extends TestCase
         $body = json_decode((string) $this->app->response->getBody(), true);
         $this->assertSame($logId, $body['id']);
         $this->assertSame($other->id, $body['user']['id']);
+    }
+
+    // ===== DELETE /blame/single/{id} =====
+
+    function testDeleteSingleAsNonAuthorNonAdminIsForbidden()
+    {
+        $user = $this->userDirector->createUser();
+        $other = $this->userDirector->createUser();
+        $logId = $this->seedBlameLogId($other->id);
+        $this->login($user);
+
+        $request = $this->requestFactory->DELETE('blame', 'single', [$logId]);
+
+        $this->withRequestUri("/blame/single/{$logId}", function () use ($request) {
+            $this->assertStatus403($request);
+        });
+    }
+
+    /**
+     * NÃO despachamos um DELETE real como autor/admin aqui — ver docblock da classe e a nota
+     * abaixo. Este teste caracteriza só a CHECAGEM DE PERMISSÃO (Entity::checkPermission,
+     * chamada direta, sem passar por Controller::DELETE_single), que é o que determina se a
+     * remoção sequer chega a ser tentada.
+     *
+     * Descoberta: DELETE_single() (core/Traits/ControllerEntityActions.php:376-386) chama
+     * $entity->delete(true) sem NENHUMA checagem própria — delega inteiramente a
+     * Entity::canUserRemove(), que concede permissão tanto para admin quanto para
+     * getOwnerUser()->id == $user->id. Como Blame tem uma relação real $user
+     * (Blame.php:41-49), Entity::getOwnerUser() (Entity.php:328-333, "isset($this->user)")
+     * retorna essa relação — ou seja, QUALQUER usuário autenticado passa na checagem de
+     * permissão de remoção para uma linha de auditoria que registrou uma ação SUA PRÓPRIA,
+     * não só admin.
+     *
+     * Verificado manualmente (fora da suíte automatizada, pelo risco abaixo) que a remoção
+     * de fato tentada — tanto pelo autor quanto por um admin — falha no Postgres com
+     * "cannot delete from view "blame": Views that do not select from a single table or view
+     * are not automatically updatable" (SQLSTATE 55000), e essa falha FECHA o EntityManager
+     * do Doctrine para o resto do processo PHP — como a suíte roda sem isolamento de
+     * processo, qualquer arquivo de teste que rodasse depois deste na mesma execução
+     * quebraria com "EntityManager is closed". Por isso a suíte automatizada trava só a
+     * checagem de permissão (que não toca o banco além de um SELECT), não a tentativa real
+     * de DELETE.
+     */
+    function testDeleteSingleCheckPermissionPassesForAuthorOfTheLoggedActionEvenNotAdmin()
+    {
+        $user = $this->userDirector->createUser();
+        $logId = $this->seedBlameLogId($user->id);
+        $this->login($user);
+
+        $blame = $this->app->repo(Blame::class)->find($logId);
+
+        $threw = false;
+        try {
+            $blame->checkPermission('remove');
+        } catch (PermissionDenied $e) {
+            $threw = true;
+        }
+
+        $this->assertFalse(
+            $threw,
+            'O autor da ação logada (blame_request.user_id) deveria passar na checagem de permissão de remoção, mesmo não sendo admin'
+        );
     }
 }
