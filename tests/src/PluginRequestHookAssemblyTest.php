@@ -66,7 +66,7 @@ class PluginRequestHookAssemblyTest extends TestCase
         );
     }
 
-    // ===== Cenário 6 (request.enable => false) =====
+    // ===== request.enable => false =====
     //
     // O guard `if ($plugin->config['request.enable'])` fica FORA da montagem da string
     // (Plugin.php:75), envolvendo tanto a montagem quanto o registro do hook — não há como
