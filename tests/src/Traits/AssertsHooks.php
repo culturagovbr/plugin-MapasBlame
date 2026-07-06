@@ -11,8 +11,10 @@ use MapasCulturais\App;
 trait AssertsHooks
 {
     /**
-     * Registra um listener temporário no hook informado, executa $action() e confirma
-     * que o hook foi disparado pelo menos uma vez durante a execução.
+     * Registra um listener no hook informado, executa $action() e confirma que o hook foi
+     * disparado pelo menos uma vez durante a execução. O listener nunca é removido — fica
+     * registrado no App (singleton) pelo resto do processo, como qualquer outro registrado
+     * via $app->hook(); inofensivo aqui porque só seta uma flag local.
      */
     protected function assertHookFired(string $hookName, callable $action, string $message = ''): void
     {
