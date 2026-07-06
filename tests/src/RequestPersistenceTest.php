@@ -354,4 +354,23 @@ class RequestPersistenceTest extends TestCase
 
         $this->assertSame($nested, json_decode($logs[0]['metadata'], true));
     }
+
+    /**
+     * Byte nulo embutido numa string UTF-8 válida (não confundir com UTF-8 inválido, coberto
+     * no teste seguinte): `json_encode()` escapa `\0` como ` ` (JSON válido) — o round-trip
+     * preserva o byte intacto. `Request::log()` (Request.php:69-75) não trata esse caso, só
+     * passa `$metadata` verbatim para `json_encode()`.
+     */
+    function testMetadataWithEmbeddedNullByteSurvivesRoundTrip()
+    {
+        $this->setAppRequestIp('203.0.113.10');
+
+        $request = new TestableRequest();
+        $request->log('ACTION', ['valor' => "antes\0depois"]);
+
+        $logs = $this->fetchBlameLogs($request->id);
+
+        $this->assertSame(['valor' => "antes\0depois"], json_decode($logs[0]['metadata'], true));
+    }
+
 }
