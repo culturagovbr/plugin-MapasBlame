@@ -29,6 +29,28 @@ class ControllerApiTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * Plugin.php:97 lê $_SERVER['REQUEST_URI'] direto — precisa estar montado antes de
+     * qualquer dispatch real ($app->run()) que caia no fallback não-api de erro (ex.: 404),
+     * senão dispara um warning de chave indefinida.
+     */
+    private function withRequestUri(string $uri, callable $callback)
+    {
+        $hadKey = array_key_exists('REQUEST_URI', $_SERVER);
+        $previous = $_SERVER['REQUEST_URI'] ?? null;
+        $_SERVER['REQUEST_URI'] = $uri;
+
+        try {
+            return $callback();
+        } finally {
+            if ($hadKey) {
+                $_SERVER['REQUEST_URI'] = $previous;
+            } else {
+                unset($_SERVER['REQUEST_URI']);
+            }
+        }
+    }
+
     function testConstructorDoesNotThrow()
     {
         $controller = new Controller();
@@ -82,6 +104,35 @@ class ControllerApiTest extends TestCase
 
         $body = json_decode((string) $this->app->response->getBody(), true);
         $this->assertIsArray($body);
+    }
+
+    /**
+     * `Controller::callAction()` (core/Controller.php:305-308) só chama um método real para
+     * dispatch de API se existir `API_{$action}` no controller — para método 'API' a
+     * fallback `ALL_{$action}` é explicitamente pulada (Controller.php:317-319,
+     * "$method !== 'API'"). `MapasBlame\Controller` não declara `API_index` nem qualquer hook
+     * `API(blame.index)` — sem `$call_method` nem `$has_hook`, cai em `$app->pass()`
+     * (Controller.php:349), que lança `Exceptions\NotFound` e vira 404
+     * (RoutesManager.php:88-91). Comportamento observado: a superfície `/api` do controller
+     * `blame` só expõe consulta (`find`, via `ControllerApiV2`) — nenhum verbo de escrita
+     * chega perto de instanciar `Blame` (cujo `__construct` é privado, Blame.php:145) por essa
+     * via. A superfície `/api` do controller `blame`, portanto, só expõe consulta — nenhum
+     * verbo de escrita chega a instanciar `Blame` por esse caminho; ver
+     * `ControllerNonApiSurfaceTest` para a superfície não-api, que expõe escrita de fato.
+     */
+    function testApiPostAsAdminIs404BecauseControllerHasNoApiIndexAction()
+    {
+        $admin = $this->userDirector->createUser('admin');
+        $this->login($admin);
+
+        $request = new ServerRequest(method: 'POST', uri: '/api/blame');
+
+        $this->withRequestUri('/api/blame', function () use ($request) {
+            $this->app->reset();
+            $this->app->run($request, false);
+        });
+
+        $this->assertSame(404, $this->app->response->getStatusCode());
     }
 
     /**
