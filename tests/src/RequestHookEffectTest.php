@@ -54,6 +54,11 @@ class RequestHookEffectTest extends TestCase
         );
     }
 
+    private function countAllBlameLogs(): int
+    {
+        return (int) $this->app->em->getConnection()->fetchScalar('SELECT count(*) FROM blame_log');
+    }
+
     /**
      * Dispara um hit real via $app->run() contra uma rota casada e retorna o ID do
      * ÚNICO blame_request novo que aparece — falha se não for exatamente 1 novo ID.
@@ -140,6 +145,12 @@ class RequestHookEffectTest extends TestCase
 
         // ===== Ação *.renewLock é excluída do log de request =====
         $beforeRenewLock = $this->snapshotBlameRequestIds();
+        // A esta altura do teste já existem vários holders acumulados (um por hit anterior),
+        // todos com Request não-nulo — só medir blame_request não basta: se a exclusão fosse
+        // removida da produção, os disparos ainda reusariam esses Requests existentes e
+        // inseririam só em blame_log (Plugin.php:92), nunca um blame_request novo. Por isso
+        // medimos os dois lados.
+        $beforeBlameLogCount = $this->countAllBlameLogs();
         // Dispara diretamente o nome de hook que uma ação real "*.renewLock" produziria
         // (Controller.php:308,332) — testa o mecanismo de exclusão do App\Hooks
         // (Plugin.php:18, `<<*>>.renewLock`) sem depender de uma entidade/rota real. Reusa o
@@ -147,7 +158,9 @@ class RequestHookEffectTest extends TestCase
         $context = (object) ['method' => 'POST', 'id' => 'agent', 'action' => 'renewLock'];
         $this->app->applyHookBoundTo($context, 'POST(agent.renewLock):before', []);
         $afterRenewLock = $this->snapshotBlameRequestIds();
+        $afterBlameLogCount = $this->countAllBlameLogs();
 
         $this->assertSame($beforeRenewLock, $afterRenewLock, 'Uma ação *.renewLock não deveria gerar um novo blame_request');
+        $this->assertSame($beforeBlameLogCount, $afterBlameLogCount, 'Uma ação *.renewLock não deveria gerar nenhum blame_log, nem reusando um Request existente');
     }
 }
