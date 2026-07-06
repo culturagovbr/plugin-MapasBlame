@@ -171,6 +171,13 @@ class RequestPersistenceTest extends TestCase
         $this->assertSame(json_encode($request->metadata), $row['metadata']);
     }
 
+    /**
+     * Literais travados (não recomputados a partir do próprio getter Sinergi, o que só
+     * provaria round-trip contra si mesmo): para o Chrome/Windows UA acima, o
+     * `Sinergi\BrowserDetector` resolve `browser` = "Chrome", `browser version` = "120.0.0.0",
+     * `os` = "Windows", `device` = "unknown" (nenhum modelo de dispositivo reconhecido para
+     * esse UA desktop) — valor observado, verificado empiricamente.
+     */
     function testSavePersistsBrowserOsDeviceFromSinergiGetters()
     {
         $this->setAppRequestIp('203.0.113.10');
@@ -184,10 +191,10 @@ class RequestPersistenceTest extends TestCase
 
         $row = $this->fetchBlameRequest($request->id);
 
-        $this->assertSame($request->browser->getName(), $row['user_browser_name']);
-        $this->assertSame($request->browser->getVersion(), $row['user_browser_version']);
-        $this->assertSame($request->os->getName(), $row['user_os']);
-        $this->assertSame($request->device->getName(), $row['user_device']);
+        $this->assertSame('Chrome', $row['user_browser_name']);
+        $this->assertSame('120.0.0.0', $row['user_browser_version']);
+        $this->assertSame('Windows', $row['user_os']);
+        $this->assertSame('unknown', $row['user_device']);
     }
 
     function testSavePersistsCreatedAtInExpectedFormat()
