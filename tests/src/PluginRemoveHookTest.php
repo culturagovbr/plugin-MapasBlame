@@ -96,6 +96,9 @@ class PluginRemoveHookTest extends TestCase
         $logs = $this->fetchBlameLogs($new[0]);
         $this->assertCount(1, $logs, 'A remoção deveria gerar exatamente 1 blame_log');
         $this->assertStringEndsWith(' DELETE', $logs[0]['action']);
+        // Plugin.php:119-120 chama $request->log("{$this} DELETE", []) — metadata é sempre
+        // o array vazio literal, nunca dados da entidade removida.
+        $this->assertSame('[]', $logs[0]['metadata']);
     }
 
     function testActionUsesEntityToStringFollowedByDelete()
