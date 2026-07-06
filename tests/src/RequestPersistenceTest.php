@@ -357,7 +357,7 @@ class RequestPersistenceTest extends TestCase
 
     /**
      * Byte nulo embutido numa string UTF-8 válida (não confundir com UTF-8 inválido, coberto
-     * no teste seguinte): `json_encode()` escapa `\0` como ` ` (JSON válido) — o round-trip
+     * no teste seguinte): `json_encode()` escapa `\0` como `\u0000` (JSON válido) — o round-trip
      * preserva o byte intacto. `Request::log()` (Request.php:69-75) não trata esse caso, só
      * passa `$metadata` verbatim para `json_encode()`.
      */
