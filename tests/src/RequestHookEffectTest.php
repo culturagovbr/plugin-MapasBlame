@@ -2,8 +2,10 @@
 
 namespace Tests\MapasBlame;
 
+use Laminas\Diactoros\ServerRequest;
 use Tests\Abstract\TestCase;
 use Tests\Traits\RequestFactory;
+use Tests\Traits\UserDirector;
 
 /**
  * Efeito do hook de request (Plugin.php:88-110). Todos os cenários vivem em UM ÚNICO teste,
@@ -23,6 +25,7 @@ use Tests\Traits\RequestFactory;
 class RequestHookEffectTest extends TestCase
 {
     use RequestFactory;
+    use UserDirector;
 
     private function snapshotBlameRequestIds(): array
     {
@@ -142,6 +145,20 @@ class RequestHookEffectTest extends TestCase
             $this->assertArrayHasKey($method, $metadata, "metadata deveria ter a chave {$method}");
             $this->assertSame([], $metadata[$method], "metadata[{$method}] deveria descartar o corpo da request (default de logData.{$method})");
         }
+
+        // ===== Rotas /api não geram nenhum log de request =====
+        // 'API' está comentado em request.types (Plugin.php:16) e o core só dispara hooks
+        // API(controller.action):before para essas rotas — nunca GET(...)/POST(...) (core
+        // Controller.php:305-308) — então o hook de log de request nunca chega a rodar aqui,
+        // mesmo com um dispatch real e bem-sucedido (200, admin autenticado).
+        $admin = $this->userDirector->createUser('admin');
+        $this->login($admin);
+        $beforeApi = $this->snapshotBlameRequestIds();
+        $apiRequest = new ServerRequest(method: 'GET', uri: '/api/blame/find');
+        $this->app->reset();
+        $this->app->run($apiRequest, false);
+        $afterApi = $this->snapshotBlameRequestIds();
+        $this->assertSame($beforeApi, $afterApi, 'Uma rota /api não deveria gerar um novo blame_request');
 
         // ===== Ação *.renewLock é excluída do log de request =====
         $beforeRenewLock = $this->snapshotBlameRequestIds();
